@@ -1,0 +1,86 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'package:equatable/equatable.dart';
+
+class Weather extends Equatable {
+  final String description;
+  final String icon;
+  final double temp;
+  final double tempMin;
+  final double tempMax;
+  final String name;
+  final String country;
+  final DateTime lastUpdated;
+  Weather({
+    required this.description,
+    required this.icon,
+    required this.temp,
+    required this.tempMin,
+    required this.tempMax,
+    required this.name,
+    required this.country,
+    required this.lastUpdated,
+  });
+
+  factory Weather.fromJson(Map<String, dynamic> json) {
+    final weather = json['weather'][0];
+    final main = json['main'];
+
+    return Weather(
+        description: weather['description'],
+        icon: weather['icon'],
+        temp: main['temp'],
+        tempMin: main['temp_min'],
+        tempMax: main['temp_max'],
+        country: '',
+        name: '',
+        lastUpdated: DateTime.now());
+  }
+
+  factory Weather.initial() {
+    return Weather(
+        country: '',
+        description: '',
+        icon: '',
+        lastUpdated: DateTime(1970),
+        temp: 100,
+        tempMax: 100,
+        tempMin: 100,
+        name: '');
+  }
+
+  @override
+  bool get stringify => true;
+
+  @override
+  List<Object> get props {
+    return [
+      description,
+      icon,
+      temp,
+      tempMin,
+      tempMax,
+    ];
+  }
+
+  Weather copyWith({
+    String? description,
+    String? icon,
+    double? temp,
+    double? temp_min,
+    double? temp_max,
+    String? name,
+    String? country,
+    DateTime? lastUpdated,
+  }) {
+    return Weather(
+      description: description ?? this.description,
+      icon: icon ?? this.icon,
+      temp: temp ?? this.temp,
+      tempMin: temp_min ?? this.tempMin,
+      tempMax: temp_max ?? this.tempMax,
+      name: name ?? this.name,
+      country: country ?? this.country,
+      lastUpdated: lastUpdated ?? this.lastUpdated,
+    );
+  }
+}
