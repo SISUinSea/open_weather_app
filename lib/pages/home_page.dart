@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
+import 'package:weather_app/providers/weather/weather_provider.dart';
 import 'package:weather_app/repositories/weather_repository.dart';
 import 'package:weather_app/services/weather_api_services.dart';
 
@@ -19,9 +21,8 @@ class _HomePageState extends State<HomePage> {
   }
 
   _fetchWeather() {
-    WeatherRepository(
-            weatherApiServices: WeatherApiServices(httpClient: http.Client()))
-        .fetchWeather('london');
+    WidgetsBinding.instance.addPostFrameCallback(
+        (_) => context.read<WeatherProvider>().fetchWeather('london'));
   }
 
   @override
