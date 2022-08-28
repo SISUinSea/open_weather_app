@@ -49,9 +49,6 @@ class Weather extends Equatable {
   }
 
   @override
-  bool get stringify => true;
-
-  @override
   List<Object> get props {
     return [
       description,
@@ -82,5 +79,10 @@ class Weather extends Equatable {
       country: country ?? this.country,
       lastUpdated: lastUpdated ?? this.lastUpdated,
     );
+  }
+
+  @override
+  String toString() {
+    return 'Weather(description: $description, icon: $icon, temp: $temp, tempMin: $tempMin, tempMax: $tempMax, name: $name, country: $country, lastUpdated: $lastUpdated)';
   }
 }
