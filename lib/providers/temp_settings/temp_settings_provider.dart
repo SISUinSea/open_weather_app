@@ -1,17 +1,16 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
+import 'package:state_notifier/state_notifier.dart';
 part 'temp_settings_state.dart';
 
-class TempSettingsProvider with ChangeNotifier {
-  TempSettingsState _state = TempSettingsState.initial();
-  TempSettingsState get state => _state;
+class TempSettingsProvider extends StateNotifier<TempSettingsState> {
+  TempSettingsProvider() : super(TempSettingsState.initial());
 
   void toggleTempUnit() {
-    _state = _state.copyWith(
-        tempUnit: _state.tempUnit == TempUnit.celsis
+    state = state.copyWith(
+        tempUnit: state.tempUnit == TempUnit.celsis
             ? TempUnit.fahrenheit
             : TempUnit.celsis);
-    print('temp unit: $_state');
-    notifyListeners();
+    print('temp unit: $state');
   }
 }

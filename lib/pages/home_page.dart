@@ -21,30 +21,29 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   String? _city;
   late final WeatherProvider weatherProv;
+  late final _removeListener;
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     weatherProv = context.read<WeatherProvider>();
-    weatherProv.addListener(_registerListener);
+    _removeListener = weatherProv.addListener(_registerListener);
   }
 
   @override
   void dispose() {
-    weatherProv.removeListener(_registerListener);
+    _removeListener;
     super.dispose();
   }
 
-  void _registerListener() {
-    final WeatherState ws = context.read<WeatherProvider>().state;
-
+  void _registerListener(WeatherState ws) {
     if (ws.status == WeatherStatus.error) {
       errorDialog(context, ws.error.errMsg);
     }
   }
 
   Widget _showWeather() {
-    final state = context.watch<WeatherProvider>().state;
+    final state = context.watch<WeatherState>();
 
     if (state.status == WeatherStatus.initial) {
       return Center(
@@ -123,7 +122,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   String showTemperature(double temperature) {
-    final tempUnit = context.watch<TempSettingsProvider>().state.tempUnit;
+    final tempUnit = context.watch<TempSettingsState>().tempUnit;
     return tempUnit == TempUnit.celsis
         ? temperature.toStringAsFixed(2) + '℃'
         : (temperature * 1.8 + 32).toStringAsFixed(2) + '℉';

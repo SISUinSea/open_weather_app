@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_state_notifier/flutter_state_notifier.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
@@ -27,22 +28,24 @@ class MyApp extends StatelessWidget {
               weatherApiServices:
                   WeatherApiServices(httpClient: http.Client())),
         ),
-        ChangeNotifierProvider(
-          create: (context) => WeatherProvider(
-              weatherRepository: context.read<WeatherRepository>()),
+        StateNotifierProvider<WeatherProvider, WeatherState>(
+          create: (context) => WeatherProvider(),
         ),
-        ChangeNotifierProvider<TempSettingsProvider>(
+        StateNotifierProvider<TempSettingsProvider, TempSettingsState>(
             create: (context) => TempSettingsProvider()),
-        ChangeNotifierProxyProvider<WeatherProvider, ThemeProvider>(
+        // ChangeNotifierProxyProvider<WeatherProvider, ThemeProvider>(
+        //   create: (context) => ThemeProvider(),
+        //   update: (BuildContext context, WeatherProvider wp,
+        //           ThemeProvider? themeProvider) =>
+        //       themeProvider!..update(wp),
+        // )
+        StateNotifierProvider<ThemeProvider, ThemeState>(
           create: (context) => ThemeProvider(),
-          update: (BuildContext context, WeatherProvider wp,
-                  ThemeProvider? themeProvider) =>
-              themeProvider!..update(wp),
-        )
+        ),
       ],
       builder: (context, _) => MaterialApp(
         title: 'Weather app',
-        theme: context.watch<ThemeProvider>().state.appTheme == AppTheme.light
+        theme: context.watch<ThemeState>().appTheme == AppTheme.light
             ? ThemeData.light()
             : ThemeData.dark(),
         home: const HomePage(),
