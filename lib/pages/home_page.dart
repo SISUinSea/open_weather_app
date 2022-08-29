@@ -15,32 +15,84 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   String? _city;
+  late final WeatherProvider weatherProv;
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    weatherProv = context.read<WeatherProvider>();
+    weatherProv.addListener(_registerListener);
+  }
+
+  @override
+  void dispose() {
+    weatherProv.removeListener(_registerListener);
+    super.dispose();
+  }
+
+  void _registerListener() {
+    final WeatherState ws = context.read<WeatherProvider>().state;
+
+    if (ws.status == WeatherStatus.error) {
+      showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+                content: Text(ws.error.errMsg),
+              ));
+    }
+  }
+
+  Widget _showWeather() {
+    final state = context.watch<WeatherProvider>().state;
+
+    if (state.status == WeatherStatus.initial) {
+      return Center(
+          child: Text(
+        'Select a City',
+        style: TextStyle(fontSize: 20.0),
+      ));
+    }
+    if (state.status == WeatherStatus.loading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (state.status == WeatherStatus.error && state.weather.name.isEmpty) {
+      return Center(
+          child: Text(
+        'Select a City',
+        style: TextStyle(fontSize: 20.0),
+      ));
+    }
+    return Center(
+      child: Text(
+        state.weather.name,
+        style: TextStyle(fontSize: 18.0),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Weather'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.search),
-            onPressed: () async {
-              _city = await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => SearchPage(),
-                  ));
-              print('city name: $_city');
-              if (_city != null) {
-                context.read<WeatherProvider>().fetchWeather(_city!);
-              }
-            },
-          )
-        ],
-      ),
-      body: Center(
-        child: Text('Home1'),
-      ),
-    );
+        appBar: AppBar(
+          title: const Text('Weather'),
+          actions: [
+            IconButton(
+              icon: Icon(Icons.search),
+              onPressed: () async {
+                _city = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => SearchPage(),
+                    ));
+                print('city name: $_city');
+                if (_city != null) {
+                  context.read<WeatherProvider>().fetchWeather(_city!);
+                }
+              },
+            )
+          ],
+        ),
+        body: _showWeather());
   }
 }
 

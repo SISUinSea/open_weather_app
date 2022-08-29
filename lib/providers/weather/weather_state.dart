@@ -1,6 +1,6 @@
 part of 'weather_provider.dart';
 
-enum WeatherStatus { initial, loading, loaded, fail }
+enum WeatherStatus { initial, loading, loaded, error }
 
 class WeatherState extends Equatable {
   final WeatherStatus status;
