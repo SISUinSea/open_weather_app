@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 import 'package:recase/recase.dart';
 import 'package:weather_app/constants/constants.dart';
 import 'package:weather_app/pages/search_page.dart';
+import 'package:weather_app/pages/settings_page.dart';
+import 'package:weather_app/providers/temp_settings/temp_settings_provider.dart';
 import 'package:weather_app/providers/weather/weather_provider.dart';
 import 'package:weather_app/repositories/weather_repository.dart';
 import 'package:weather_app/services/weather_api_services.dart';
@@ -121,7 +123,10 @@ class _HomePageState extends State<HomePage> {
   }
 
   String showTemperature(double temperature) {
-    return temperature.toStringAsFixed(2) + '℃';
+    final tempUnit = context.watch<TempSettingsProvider>().state.tempUnit;
+    return tempUnit == TempUnit.celsis
+        ? temperature.toStringAsFixed(2) + '℃'
+        : (temperature * 1.8 + 32).toStringAsFixed(2) + '℉';
   }
 
   Widget showIcon(String icon) {
@@ -161,6 +166,14 @@ class _HomePageState extends State<HomePage> {
                   context.read<WeatherProvider>().fetchWeather(_city!);
                 }
               },
+            ),
+            IconButton(
+              icon: Icon(Icons.settings),
+              onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => SettingsPage(),
+                  )),
             )
           ],
         ),
