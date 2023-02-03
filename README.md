@@ -1,16 +1,11 @@
-# weather_app
+#weather_app
+##A new Flutter project using Open Weather map API to get geolocation by passed city name and get the city's weather.
 
-A new Flutter project.
+##Able to Change it's temperature Unit at settings(Celcius/Fahrenheit).
 
-## Getting Started
+##Theme will be automatically changed based on the fetced city's temperature.(20℃)
 
-This project is a starting point for a Flutter application.
+##To see the latest Code, go to branch 'trial_3'
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+#Project Result
+https://sisupage.notion.site/Flutter-weather-provider-project-9559e3bfaa434d75b9f197a5eb133368
