@@ -1,4 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:recase/recase.dart';
+import 'package:weather_app/models/weather.dart';
+import 'package:weather_app/pages/search_page.dart';
+import 'package:weather_app/pages/settings_page.dart';
+import 'package:weather_app/providers/temp_settings/temp_settings_provider.dart';
+import 'package:weather_app/providers/weather/weather_provider.dart';
+import 'package:weather_app/repositories/weather_repository.dart';
+import 'package:weather_app/services/weather_api_services.dart';
+import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
+import 'package:weather_app/widgets/error_dialog.dart';
+import 'package:weather_app/constants/constant.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -8,15 +20,164 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  late final WeatherProvider _weatherProv;
+
+  @override
+  void initState() {
+    super.initState();
+    _weatherProv = context.read<WeatherProvider>();
+    _weatherProv.addListener(_registerListener);
+  }
+
+  @override
+  void dispose() {
+    _weatherProv.removeListener(_registerListener);
+    super.dispose();
+  }
+
+  void _registerListener() {
+    final WeatherState ws = context.read<WeatherProvider>().state;
+    if (ws.weatherStatus == WeatherStatus.error) {
+      errorDialog(context, ws.error.errMsg);
+    }
+  }
+
+  String showTemperature(double temperature) {
+    final currentTempUnit =
+        context.watch<TempSettingsProvider>().state.tempUnit;
+    if (currentTempUnit == TempUnit.celsius)
+      return temperature.toStringAsFixed(2) + '℃';
+    else
+      return ((temperature * 9 / 5) + 32).toStringAsFixed(2) + '℉';
+  }
+
+  Widget _showWeather() {
+    final state = context.watch<WeatherProvider>().state;
+
+    if (state.weatherStatus == WeatherStatus.initial ||
+        state.weatherStatus == WeatherStatus.error &&
+            state.weather.name.isEmpty) {
+      return Center(
+        child: Text(
+          'Select a city',
+          style: TextStyle(fontSize: 20.0),
+        ),
+      );
+    } else if (state.weatherStatus == WeatherStatus.loading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    return ListView(
+      children: [
+        SizedBox(height: MediaQuery.of(context).size.height / 6),
+        Text(
+          state.weather.name,
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 40.0, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 10.0),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              TimeOfDay.fromDateTime(state.weather.lastUpdated).format(context),
+              style: const TextStyle(fontSize: 18.0),
+            ),
+            const SizedBox(width: 10.0),
+            Text(
+              '(${state.weather.country})',
+              style: const TextStyle(fontSize: 18.0),
+            )
+          ],
+        ),
+        const SizedBox(height: 60.0),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              showTemperature(state.weather.temp),
+              style: TextStyle(fontSize: 30.0),
+            ),
+            const SizedBox(width: 20.0),
+            Column(
+              children: [
+                Text(
+                  showTemperature(state.weather.tempMax),
+                  style: TextStyle(fontSize: 16.0),
+                ),
+                const SizedBox(height: 10.0),
+                Text(
+                  showTemperature(state.weather.tempMin),
+                  style: TextStyle(fontSize: 16.0),
+                )
+              ],
+            )
+          ],
+        ),
+        const SizedBox(height: 40.0),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            const Spacer(),
+            showIcon(state.weather.icon),
+            Expanded(flex: 3, child: formatText(state.weather.description)),
+            const Spacer(),
+          ],
+        )
+      ],
+    );
+  }
+
+  Widget showIcon(String icon) {
+    return FadeInImage.assetNetwork(
+      placeholder: 'assets/images/loading.gif',
+      image: 'http://$kIconHost/img/wn/$icon@4x.png',
+      width: 96,
+      height: 96,
+    );
+  }
+
+  Widget formatText(String description) {
+    final formattedString = description.titleCase;
+    return Text(
+      formattedString,
+      style: const TextStyle(fontSize: 24.0),
+    );
+  }
+
+  String? _city;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Weather'),
-      ),
-      body: Center(
-        child: Text('Home1'),
-      ),
-    );
+        appBar: AppBar(
+          title: const Text('Weather'),
+          actions: [
+            IconButton(
+              icon: Icon(Icons.search),
+              onPressed: () async {
+                _city = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => SearchPage(),
+                    ));
+                print('City : $_city');
+                if (_city != null) {
+                  context.read<WeatherProvider>().fetchWeather(_city!);
+                }
+              },
+            ),
+            IconButton(
+              icon: Icon(Icons.settings),
+              onPressed: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => SettingsPage(),
+                    ));
+              },
+            ),
+          ],
+        ),
+        body: _showWeather());
   }
 }
